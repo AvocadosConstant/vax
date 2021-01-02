@@ -56,12 +56,12 @@ def convert_codon(codon):
         'TGC':'C', 'TGT':'C', 'TGA':'_', 'TGG':'W', 
     } 
     codon = ''.join([convert_base(base, Convert.TO_DNA) for base in codon])
-    return codon_table[codon]
+    return codon_table.get(codon, '?')
 
 def horizontal_print(lsts, chunk_size):
     rows = []
 
-    chunked = [list(chunk_generator(lst, 30)) for lst in lsts]
+    chunked = [list(chunk_generator(lst, chunk_size)) for lst in lsts]
 
     #print(chunked)
 
@@ -86,15 +86,20 @@ class Gene:
 
         self.generate_codons()
 
-    def generate_codons(self):
+    def generate_codons(self, start=0, end=-1):
+        if end == -1:
+            end = len(self.sequence)
         self.codons = []
         self.aminos = []
-        for codon in chunk_generator(self.sequence, 3):
+        for codon in chunk_generator(self.sequence[start:end], 3):
             self.codons.append(codon)
             self.aminos.append(convert_codon(codon))
 
-    def format_for_print(self, diff_idxs=[], diff_aminos=[], conv_code=Convert.NONE):
-        codons = format_gen_seq_to_bases(self.sequence, diff_idxs, conv_code)
+    def format_for_print(self, diff_idxs=[], diff_aminos=[], conv_code=Convert.NONE, start=0, end=-1):
+        if end == -1:
+            end = len(self.sequence)
+
+        codons = format_gen_seq_to_bases(self.sequence[start:end], diff_idxs, conv_code)
         codons = [''.join(chunk) for chunk in chunk_generator(codons, 3)]
 
         aminos = []
@@ -118,29 +123,33 @@ class Gene:
         codons = ' '.join(codons)
         return f'{aminos}\n{codons}'
 
-    def visual_compare(self, other):
-        a_sequence = ''.join([convert_base(base, Convert.TO_DNA) for base in self.sequence])
-        b_sequence = ''.join([convert_base(base, Convert.TO_DNA) for base in other.sequence])
-        diff_idxs = [i for i in range(len(self.sequence)) if a_sequence[i] != b_sequence[i]]
+    def visual_compare(self, other, start=0, end=-1):
+        if end == -1:
+            end = len(self.sequence)
+        a_sequence = ''.join([convert_base(base, Convert.TO_RNA) for base in self.sequence[start:end]])
+        b_sequence = ''.join([convert_base(base, Convert.TO_RNA) for base in other.sequence[start:end]])
+        diff_idxs = [i for i in range(len(a_sequence)) if a_sequence[i] != b_sequence[i]]
+
+        self.generate_codons(start=start, end=end)
+        other.generate_codons(start=start, end=end)
         diff_aminos = [i for i in range(len(self.aminos)) if self.aminos[i] != other.aminos[i]]
 
-        a_codons, a_aminos = self.format_for_print(diff_idxs, diff_aminos, conv_code=Convert.TO_DNA)
-        b_codons, b_aminos = other.format_for_print(diff_idxs, diff_aminos, conv_code=Convert.TO_DNA)
+        a_codons, a_aminos = self.format_for_print(diff_idxs, diff_aminos, conv_code=Convert.TO_RNA, start=start, end=end)
+        b_codons, b_aminos = other.format_for_print(diff_idxs, diff_aminos, conv_code=Convert.TO_RNA, start=start, end=end)
 
         outputs = [
             a_aminos,
             a_codons,
             b_codons,
             b_aminos]
-        horizontal_print(outputs, 30)
 
-        """
+        print(f'Comparing sequences between offsets [{start}:{end}]')
+        horizontal_print(outputs, 24)
 
-        a_codons = '\n'.join([' '.join(chunk) for chunk in chunk_generator(a_codons, 30)])
-        print(a_codons)
-        print()
-        print(f'{a_aminos}\n{a_codons}\n{b_codons}\n{b_aminos}')
-        """
+        # Reset from offsets
+        if start != 0 or end != 0:
+            self.generate_codons()
+            other.generate_codons()
 
 
 def format_color_text(text, fg=FG_DEFAULT, bg=BG_DEFAULT):
@@ -167,7 +176,7 @@ def convert_base(base, conv_code):
     if conv_code == Convert.TO_DNA:
         base = 'T' if base in ['U', 'Ψ'] else base
     if conv_code == Convert.TO_RNA:
-        base = 'U' if base == 'T'  else base
+        base = 'U' if base in ['T', 'Ψ']  else base
     return base
 
 
@@ -178,31 +187,20 @@ def format_gen_seq_to_bases(seq, diff_idxs=[], conv_code=Convert.NONE):
 
     return bases
 
-def visual_compare_seqs(seq_a, seq_b, conv_code=Convert.NONE):
-    diff_idxs = [i for i in range(len(seq_a)) if seq_a[i] != seq_b[i]]
 
-    bases_a = format_gen_seq_to_bases(seq_a, diff_idxs, conv_code)
-    bases_b = format_gen_seq_to_bases(seq_b, diff_idxs, conv_code)
+def main():
+    seq_a = 'ATCUGΨATCUGΨATCUGΨATCUGΨATCUGΨATCUGΨ'
+    seq_b = 'ATCTGTATCTATATCTGTATCTGTATCTGTATCTGT'
 
-    #print(''.join(format_gen_seq_to_bases(seq_a, diff_idxs, conv_code)))
-    #print(''.join(format_gen_seq_to_bases(seq_b, diff_idxs, conv_code)))
+    gene_a = Gene(seq_a)
+    gene_b = Gene(seq_b)
+    #print(gene_a)
 
+    gene_a.visual_compare(gene_b)
 
+    gene_a.visual_compare(gene_b, start=1)
 
-out = ''.join(format_gen_seq_to_bases('ATCUGΨ'))
-out = ''.join(format_gen_seq_to_bases('ATCUGΨATCUGΨATCUGΨATCUGΨATCUGΨATCUGΨ', conv_code=Convert.TO_DNA))
-#print(repr(out))
-#print(out)
+    gene_a.visual_compare(gene_b, start=3, end=12)
 
-
-seq_a = 'ATCUGΨATCUGΨATCUGΨATCUGΨATCUGΨATCUGΨ'
-seq_b = 'ATCTGTATCTATATCTGTATCTGTATCTGTATCTGT'
-visual_compare_seqs(seq_a, seq_b)
-
-gene_a = Gene(seq_a)
-gene_b = Gene(seq_b)
-#print(gene_a)
-
-#print('\n\n')
-
-gene_a.visual_compare(gene_b)
+if __name__ == '__main__':
+    main()

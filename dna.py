@@ -1,69 +1,34 @@
+import ansi
+
 from contextlib import contextmanager
 import enum
 import re
+
 
 class Convert(enum.Enum):
     NONE = 0
     TO_DNA = 1
     TO_RNA = 2
 
-# Ansi COlor Constants
-COL_START =     '\x1b['
-COL_END =       f'{COL_START}0'
-
-BOLD =          '1'
-UNDERLINE =     '4'
-FRAMED =        '51'
-
-FG_BLACK =      '30'
-FG_RED =        '31'
-FG_GREEN =      '32'
-FG_YELLOW =     '33'
-FG_BLUE =       '34'
-FG_MAGENTA =    '35'
-FG_CYAN =       '36'
-FG_WHITE =      '37'
-FG_DEFAULT =    '39'
-
-BG_BLACK =      '40'
-BG_RED =        '41'
-BG_GREEN =      '42'
-BG_YELLOW =     '43'
-BG_BLUE =       '44'
-BG_MAGENTA =    '45'
-BG_CYAN =       '46'
-BG_WHITE =      '47'
-BG_GRAY =       '100'
-BG_DEFAULT =    '49'
-
-
-def format_ansi_text(text, *args):
-    """ ANSI Color Codes
-    See https://en.wikipedia.org/wiki/ANSI_escape_code
-    """
-    attrs = ';'.join(args)
-    return f'{COL_START}{attrs}m{text}{COL_END}m'
-
-
 def format_base(base, diff=None):
     base_color_table = {
-        'A': FG_GREEN,
-        'C': FG_BLUE,
-        'G': FG_YELLOW,
-        'T': FG_MAGENTA,
-        'U': FG_MAGENTA,
-        'Ψ': FG_MAGENTA
+        'A': ansi.FG_GREEN,
+        'C': ansi.FG_BLUE,
+        'G': ansi.FG_YELLOW,
+        'T': ansi.FG_MAGENTA,
+        'U': ansi.FG_MAGENTA,
+        'Ψ': ansi.FG_MAGENTA
     }
     base_bg_table = {
-        'A': BG_GREEN,
-        'C': BG_BLUE,
-        'G': BG_YELLOW,
-        'T': BG_MAGENTA,
-        'U': BG_MAGENTA,
-        'Ψ': BG_MAGENTA
+        'A': ansi.BG_GREEN,
+        'C': ansi.BG_BLUE,
+        'G': ansi.BG_YELLOW,
+        'T': ansi.BG_MAGENTA,
+        'U': ansi.BG_MAGENTA,
+        'Ψ': ansi.BG_MAGENTA
     }
-    diff_attr = (BOLD, UNDERLINE, FRAMED, base_bg_table[base], FG_DEFAULT) if diff else (BG_DEFAULT,)
-    return format_ansi_text(base, base_color_table[base], *diff_attr)
+    diff_attr = (ansi.BOLD, ansi.UNDERLINE, base_bg_table[base], ansi.FG_DEFAULT) if diff else (ansi.BG_DEFAULT,)
+    return ansi.format(base, base_color_table[base], *diff_attr)
 
 
 def convert_base(base, conv_code):
@@ -173,7 +138,7 @@ class Gene:
         for amino_i, amino in enumerate(self.aminos):
             spacer = ' '
             if amino_i in diff_aminos:
-                amino = format_ansi_text(f'!{amino}!', BOLD, UNDERLINE, BG_WHITE, FG_DEFAULT)
+                amino = ansi.format(f' {amino} ', ansi.BOLD, ansi.UNDERLINE, ansi.REVERSE)
                 spacer = ''
             aminos.append(f'{spacer}{amino}{spacer}')
 

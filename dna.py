@@ -192,34 +192,3 @@ class Gene:
 
             print(f'Comparing sequences between offsets [{start}:{end if end is not None else len(self.sequence)}]')
             horizontal_print(outputs, 24)
-
-
-def main():
-    seq_a = 'ATCUGΨATCAUGΨATCUGΨATCUGΨATCUGΨATCUG'
-    seq_b = 'ATCTGTATCATATATCTGTATCTGTATCTGTATCTG'
-
-    gene_a = Gene(seq_a)
-    gene_b = Gene(seq_b)
-    print(gene_a)
-    print()
-    gene_a.display()
-    print()
-    gene_a.display(show_aminos=True)
-    print()
-    gene_a.display(split_codons=False)
-    print()
-    gene_a.display(start=20, split_codons=False)
-    print()
-    gene_a.display(start=3, end=6, split_codons=False)
-    print()
-    gene_a.display(start=3, end=6, show_aminos=True)
-    print()
-
-    gene_a.visual_compare(gene_b)
-
-    gene_a.visual_compare(gene_b, start=1)
-
-    gene_a.visual_compare(gene_b, start=3, end=12)
-
-if __name__ == '__main__':
-    main()

@@ -16,7 +16,8 @@ def gene():
 
 def test_display_basic(gene_a):
     output = gene_a.display(
-        split_codons=False, show_aminos=False)
+        split_codons=False, show_aminos=False, display=False)
+    print(output)
 
     correct = ('\x1b[32;49mA\x1b[0m'
                '\x1b[35;49mT\x1b[0m'
@@ -29,7 +30,9 @@ def test_display_basic(gene_a):
 
 def test_display_split(gene_a):
     output = gene_a.display(
-        split_codons=True, show_aminos=False)
+        split_codons=True, show_aminos=False, display=False)
+    print(output)
+
 
     correct = ('\x1b[32;49mA\x1b[0m'
                '\x1b[35;49mT\x1b[0m'
@@ -43,7 +46,9 @@ def test_display_split(gene_a):
 
 def test_display_split_aminos(gene_a):
     output = gene_a.display(
-        split_codons=True, show_aminos=True)
+        split_codons=True, show_aminos=True, display=False)
+    print(output)
+
 
     correct = (' I   C \n'
               '\x1b[32;49mA\x1b[0m'
@@ -60,7 +65,10 @@ def test_display_frame(gene_a):
     output = gene_a.display(
         start=2, end=5,
         split_codons=False,
-        show_aminos=False)
+        show_aminos=False,
+        display=False)
+    print(output)
+
 
     correct = ('\x1b[34;49mC\x1b[0m'
                '\x1b[35;49mU\x1b[0m'
@@ -72,7 +80,10 @@ def test_display_frame_aminos(gene_a):
     output = gene_a.display(
         start=2, end=5,
         split_codons=False,
-        show_aminos=True)
+        show_aminos=True,
+        display=False)
+    print(output)
+
 
     correct = (' L \n'
                '\x1b[34;49mC\x1b[0m'

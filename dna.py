@@ -92,7 +92,7 @@ def format_lsts_to_rows(lsts, chunk_size):
 
 def horizontal_print(lsts, chunk_size):
     for row in format_lsts_to_rows(lsts, chunk_size):
-        print('\n'.join(row) + '\n')
+        print('\n'.join(row) + '\n\n')
 
 
 class Gene:
@@ -177,6 +177,7 @@ class Gene:
                 out = f'{aminos}\n{codons}'
             if display:
                 print(out)
+                return None
             return out
 
     def find_diff_idxs(self, other):

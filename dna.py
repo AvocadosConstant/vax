@@ -12,13 +12,14 @@ class Convert(enum.Enum):
 
 
 def format_base(base, diff=None):
+    t_u_psi_color = 'MAGENTA'
     base_color = {
         'A': 'GREEN',
         'C': 'BLUE',
         'G': 'YELLOW',
-        'T': 'MAGENTA',
-        'U': 'MAGENTA',
-        'Ψ': 'MAGENTA'
+        'T': t_u_psi_color,
+        'U': t_u_psi_color,
+        'Ψ': t_u_psi_color
     }
     diff_attr = (ansi.bg('DEFAULT'),)
     if diff:
